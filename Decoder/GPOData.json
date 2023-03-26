@@ -1,0 +1,43 @@
+{
+    "Description": "Get GPO basic data from XML Report.",
+    "Source": "Get-GPOReport",
+    "Parameter": "-ReportType Xml",
+    "Skip": 0,
+    "Header": null,
+    "Footer": null,
+    "Separator": ["^<GPO","^</GPO>$"],
+    "GUID": {
+        "Excerpt": ["\\{(.*?)\\}"],
+        "Value": "RegEx0.Group0"
+    },
+    "Name": {
+        "Excerpt": ["</Identifier>","<Name>(.*?)</Name>"],
+        "Value": "RegEx1.Group0"
+    },
+    "Created": {
+        "Excerpt": ["<CreatedTime>(.*?)</CreatedTime>"],
+        "Value": "RegEx0.Group0",
+        "Type": "System.DateTime"
+    },
+    "Modified": {
+        "Excerpt": ["<ModifiedTime>(.*?)</ModifiedTime>"],
+        "Value": "RegEx0.Group0",
+        "Type": "System.DateTime"
+    },
+    "ComputerVersion": {
+        "Excerpt": ["<Computer>","<VersionDirectory>(.*?)</VersionDirectory>"],
+        "Value": "RegEx1.Group0"
+    },
+    "ComputerEnabled": {
+        "Excerpt": ["<Computer>","<Enabled>(.*?)</Enabled>"],
+        "Value": "RegEx1.Group0"
+    },
+    "UserVersion": {
+        "Excerpt": ["<User>","<VersionDirectory>(.*?)</VersionDirectory>"],
+        "Value": "RegEx1.Group0"
+    },
+    "UserEnabled": {
+        "Excerpt": ["<User>","<Enabled>(.*?)</Enabled>"],
+        "Value": "RegEx1.Group0"
+    }
+}

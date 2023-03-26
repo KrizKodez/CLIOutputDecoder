@@ -1,0 +1,27 @@
+This file shows the structure of a Decoder at runtime.
+Some keys will be added to the decoder JSON object.
+!! Do not use this file as a Decoder Template. !!
+{
+    "Description": "Description of the decoder",
+    "Source": "Name of used CLI command",
+    "Parameter": "Description of expected Command parameters",
+    "Skip": 0,
+    "Header": null,
+    "Footer": null,
+    "Separator": ["Array of RegEx which defines possible separators"],
+    "Result property name or a dummy name": {
+        "Excerpt": ["Array of RexEx with capture groups.",
+                    "The order of the RegEx must be the same the data have in the data stream",
+                    "means RegEx0 must come before RegEx1 in the data because RegEx1 will only be tested if RegEx0 was succesfull etc pp."
+                    "Each RegEx will only tested in its own line and never two RegEx in the same line. To get multiple fragments of"
+                    "data the RegEx must have multiple capture groups."
+    ],
+        "Excerpt": ["RegEx0","RegEx1","RegEx2"],
+        "Value": "Result property value, String built from n expressions RegExK.GroupL",
+        "Name": "Result property name, String built from m expressions RegExK.GroupL",
+        "ExcerptIndex": 0,
+        "Values": [],
+        "Completed": false,
+        "RegExData": {}
+    }
+}

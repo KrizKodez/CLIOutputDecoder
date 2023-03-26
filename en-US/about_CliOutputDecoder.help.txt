@@ -1,0 +1,163 @@
+TOPIC
+
+	PowerShell CLI Output Decoder Module.
+
+SYNOPSIS
+
+	This help file explains the CLIOutputDecoder module.
+
+DESCRIPTION
+
+	This module tries to mitigate a recurrent problem which is the handling of the text output
+	of Non-PowerShell CLI commands. Legacy commands do not make use of the object-oriented PowerShell
+	output and therefore if a PowerShell script wants to use such commands it must parse the output itself.
+	In this case the used code snippets are often written multiple times in different scripts
+	or the coder must search everytime where he/she used such a snippet the last time.
+	The thought is here to define in a declaritive way which data from output of commands the
+	converter should use to built PowerShell PSCustomObjects with the catched data. The declaration of the parsing
+	will be done with special JSON files aka the Decoders. By default the module comes with some Decoders
+	which could be listed with the Get-CliDecoder function:
+
+	Decoder              Command         Parameter                                          Description
+	-------              -------         ---------                                          -----------
+	ComputerPolicy       gpresult        /scope Computer /v                                 Output of computer policies applied to a computer.
+	GetPackageInfo       dism            /online /Get-PackageInfo /PackageName:<PackageN... Get Package Information.
+	GetPackages          dism            /online /Get-Packages                              List all installed packages.
+	nslookupDCIPs        nslookup        -type=srv _ldap._tcp.dc._msdcs.<DomainName>        List registered DCs and IPs of a domain.
+	nslookupDCs          nslookup        -type=srv _ldap._tcp.dc._msdcs.<DomainName>        List DC SRV records of a domain.
+	QueryDuplicateSPNs   SetSPN          -X -P                                              Query all duplicate SPN in the domain.
+		
+	The output shows the name of the decoder, the name of the CLI command and it parameters which the decoder could decode
+	and a more verbose description what kind of data the decoder catches.
+	To use a decoder the decoder file must be stored in the 'Decoder' subdirectory of the module to avoid that the user is searching the decoder file
+	now instead of the code snippet.
+
+RUNNNING A DECODER
+	
+	The Decoder could be used with the ConvertFrom-CliOutput function. There are different methods to use it and we show here only one example
+	but you could get more information if you look into the help of the function itself.
+
+	If you want to catch the Domain Controller SRV Records with the nslookup command you get typically the following output:
+
+	C:> nslookup -type=srv _ldap._tcp.dc._msdcs.domain.local
+	Server:  dnsserver.domain.local
+	Address:  10.233.72.20
+
+	_ldap._tcp.dc._msdcs.domain.local    SRV service location:
+			priority       = 0
+			weight         = 100
+			port           = 389
+			svr hostname   = dcname1.domain.local
+	_ldap._tcp.dc._msdcs.domain.local    SRV service location:
+			priority       = 0
+			weight         = 100
+			port           = 389
+			svr hostname   = dcname2.domain.local
+			.
+			.
+			. etc pp.
+
+	You can see in this example the data is organized in a kind of 'blocks' and it would be great if we could get data
+	like the server name and the values for priority, weight and the port of each block in a separate PowerShell object.
+
+	Now we have a Decoder called 'nslookupDCs' in our Repo which we could use in the following way:
+
+	C:> nslookup -type=srv _ldap._tcp.dc._msdcs.domain.local | to -Decoder nslookupDCs
+
+	Host                          Priority Port Weight
+	----                          -------- ---- ------
+	dcnam1.domain.local            0        389  100
+	dcname2.domain.local           0        389  100
+
+	We pipe the ouput of the CLI command to the ConvertFrom-CliOutput function aka 'to' and specify the name of the Decoder which has to be used.
+	The ouput is a collection of PSCustomObjects with the data we want to be catched from the stream.
+
+
+CREATING A DECODER FILE
+	
+	A Decoder file is a JSON file with some specific keys and values:
+
+	{
+		"Description": "List DC SRV records of a domain.",
+		"Source": "nslookup",
+		"Parameter": "-type=srv _ldap._tcp.dc._msdcs.<DomainName>",
+		"Skip": 0,
+		"Header": null,
+		"Footer": null,
+		"Separator": [
+						"^\\s*$",
+						"^_ldap\\._tcp\\.dc\\._msdcs"   
+		],
+		"Host": {
+			"Excerpt": ["svr hostname\\s+= (.*)"],
+			"Value": "RegEx0.Group0"
+		},
+		"Priority": {
+			"Excerpt": ["priority\\s+= (.*)"],
+			"Value": "RegEx0.Group0"
+		},
+		"Port": {
+			"Excerpt": ["port\\s+= (.*)"],
+			"Value": "RegEx0.Group0"
+		},
+		"Weight": {
+			"Excerpt": ["weight\\s+= (.*)"],
+			"Value": "RegEx0.Group0"
+		}
+	}
+
+	DESCRIPTION
+	Describes the kind of data which will be catched by the decoder.
+
+	SOURCE
+	The name of the CLI command used to get the output or another source.
+
+	PARAMETER
+	The parameter string used in the CLI command to get the output.
+
+	SKIP
+	The number of lines in the output which should be skipped absolutely. The value must be an integer.
+
+	HEADER
+	A RegEx to detect the header line of the data stream. All lines before the header will be ignored.
+	The SKIP value has the higher priority means if the skip value cause to jump over the header line 
+	and the HEADER has been defined the rest of the data will be ignored because the header could not be found anymore.
+	The best is to use SKIP and HEADER mutual exclusive.
+
+	FOOTER
+	A RegEx to detect the footer line of the data stream. All lines behind the footer will be ignored and the next object
+	in the pipe will be parsed.
+
+	SEPARATOR
+	An array of RegEx to detect the start or stop of a block of lines. The Decoder uses all of its items in a locical OR,
+	so if at least one of the SEPARATOR patterns match a separator line has been detected and the next object will be created.
+
+	The rest of the keys in the example are defining the properties which the result PSCustomObject should have.
+	Each property is a JSON object with different keys:
+
+		KEY
+		This is the name of the property in the PSCustomObject.
+
+		EXCERPT
+		An array of RegEx to detect the data for the property. Each RegEx item in the array will be used one time in a block of lines
+		in the same order as defined in the array. A property is only complete if all RegEx items of the EXCEPRT has been matched.
+		The RegEx must have capture groups to get the data from the stream.
+
+		VALUE
+		A string which creates the value of the property out of the EXCERPT RegEx items. To identify the results from the EXCERPT items
+		we use the following syntax:
+			RegEx0.Group0 is the result from the first capture group from the first RegEx pattern in the EXCERPT array.
+		You could create an arbitrary string which includes the RegEx.Group items e.g.
+			"Value": "This is my Servername: RegEx0.Group0 from OU: RegEx1.Group2"
+		The function will try to replace each RegEx.Group string with the result from the capture group.
+
+		TYPE
+		Optional string representing a .NET Type. The function will try to convert the VALUE into this type after it has trimmed.
+
+		THE SECTION KEY
+		A key called SECTION is a reserved key which does not behave exactly the same like arbitrary keys. While normal properties are evaluated
+		in a block of lines means between two SEPARATORs the SECTION key is used to identify sections means groups of blocks.
+
+SEE ALSO
+	ConvertFrom-CliOutput
+	

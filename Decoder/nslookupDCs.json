@@ -1,0 +1,28 @@
+{
+    "Description": "List DC SRV records of a domain.",
+    "Source": "nslookup",
+    "Parameter": "-type=srv _ldap._tcp.dc._msdcs.<DomainName>",
+    "Skip": 0,
+    "Header": null,
+    "Footer": null,
+    "Separator": [
+                    "^\\s*$",
+                    "^_ldap\\._tcp\\.dc\\._msdcs"   
+    ],
+    "Host": {
+        "Excerpt": ["svr hostname\\s+= (.*)"],
+        "Value": "RegEx0.Group0"
+    },
+    "Priority": {
+        "Excerpt": ["priority\\s+= (.*)"],
+        "Value": "RegEx0.Group0"
+    },
+    "Port": {
+        "Excerpt": ["port\\s+= (.*)"],
+        "Value": "RegEx0.Group0"
+    },
+    "Weight": {
+        "Excerpt": ["weight\\s+= (.*)"],
+        "Value": "RegEx0.Group0"
+    }
+}

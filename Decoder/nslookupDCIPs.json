@@ -1,0 +1,17 @@
+{
+    "Description": "List registered DCs and IPs of a domain.",
+    "Source": "nslookup",
+    "Parameter": "-type=srv _ldap._tcp.dc._msdcs.<DomainName>",
+    "Skip": 0,
+    "Header": null,
+    "Footer": null,
+    "Separator": ["internet address"],
+    "Host": {
+        "Excerpt": ["(.*?)\t+internet address =(.*)"],
+        "Value": "RegEx0.Group0"
+    },
+    "IP": {
+        "Excerpt": ["(.*?)\t+internet address =(.*)"],
+        "Value": "RegEx0.Group1"
+    }
+}

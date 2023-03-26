@@ -1,0 +1,25 @@
+{
+    "Description": "Get User and Client IP with unsigned LDAP bind.",
+    "Source": "EventLog",
+    "Parameter": "Directory Services Log",
+    "Skip": 0,
+    "Header": null,
+    "Footer": null,
+    "Separator": ["^The following client performed a SASL","^[0,1]$"],
+    "SourceIP": {
+        "Excerpt": ["Client IP address:","(^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}):([0-9]{1,5})"],
+        "Value": "RegEx1.Group0"
+    },
+    "SourcePort": {
+        "Excerpt": ["Client IP address:","(^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}):([0-9]{1,5})"],
+        "Value": "RegEx1.Group1"
+    },
+    "User": {
+        "Excerpt": ["^Identity the client attempted to authenticate as:","^(.+?\\\\.+$)"],
+        "Value": "RegEx1.Group0"
+    },
+    "BindingType": {
+        "Excerpt": ["^Binding Type:","^([0,1])$"],
+        "Value": "RegEx1.Group0"
+    }
+}

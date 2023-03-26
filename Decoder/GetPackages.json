@@ -1,0 +1,26 @@
+{
+    "Description": "List all installed packages.",
+    "Source": "dism",
+    "Parameter": "/online /Get-Packages",
+    "Skip": 0,
+    "Header": null,
+    "Footer": null,
+    "Separator": ["^\\s*$"],
+    "Name": {
+        "Excerpt": ["Identity : (.*)"],
+        "Value": "RegEx0.Group0"
+    },
+    "Type": {
+        "Excerpt": ["Type : (.*)"],
+        "Value": "RegEx0.Group0"
+    },
+    "State": {
+        "Excerpt": ["State : (.*)"],
+        "Value": "RegEx0.Group0"
+    },
+    "Date": {
+        "Excerpt": ["Time : (.*)"],
+        "Value": "RegEx0.Group0",
+        "Type": "System.DateTime"
+    }
+}

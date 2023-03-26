@@ -1,0 +1,21 @@
+{
+    "Description": "Get Package Information.",
+    "Source": "dism",
+    "Parameter": "/online /Get-PackageInfo /PackageName:<PackageName>",
+    "Skip": 0,
+    "Header": null,
+    "Footer": null,
+    "Separator": ["^The operation completed successfully\\.$"],
+    "Applicable": {
+        "Excerpt": ["Applicable : (.*)"],
+        "Value": "RegEx0.Group0"
+    },
+    "InstallDate": {
+        "Excerpt": ["Install Time : (.*)"],
+        "Value": "RegEx0.Group0"
+    },
+    "KB": {
+        "Excerpt": ["support.microsoft.com/help/(.*)"],
+        "Value": "KBRegEx0.Group0"
+    }
+}

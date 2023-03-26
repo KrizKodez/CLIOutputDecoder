@@ -1,0 +1,21 @@
+{
+    "Description": "Get GPO Links from XML Report.",
+    "Source": "Get-GPOReport",
+    "Parameter": "-ReportType Xml",
+    "Skip": 0,
+    "Header": "<LinksTo>",
+    "Footer": null,
+    "Separator": ["</LinksTo>"],
+    "Path": {
+        "Excerpt": ["<SOMPath>(.*?)</SOMPath>"],
+        "Value": "RegEx0.Group0"
+    },
+    "Enabled": {
+        "Excerpt": ["<Enabled>(.*?)</Enabled>"],
+        "Value": "RegEx0.Group0"
+    },
+    "NoOverride": {
+        "Excerpt": ["<NoOverride>(.*?)</NoOverride>"],
+        "Value": "RegEx0.Group0"
+    }
+}

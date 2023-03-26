@@ -1,0 +1,21 @@
+{
+    "Description": "Query all duplicate SPN in the domain.",
+    "Source": "SetSPN",
+    "Parameter": "-X -P",
+    "Skip": 2,
+    "Header": null,
+    "Footer": null,
+    "Separator": ["^\\s*$"],
+    "Hostname": {
+        "Excerpt": ["[a-z0-9-]*/(.*) is registered"],
+        "Value": "RegEx0.Group0"
+    },
+    "Class": {
+        "Excerpt": ["([a-z0-9-]+)/.*? is registered"],
+        "Value": "RegEx0.Group0"
+    },
+    "CN": {
+        "Excerpt": ["^[ \t]*(CN=.*)"],
+        "Value": "RegEx0.Group0"
+    }
+}

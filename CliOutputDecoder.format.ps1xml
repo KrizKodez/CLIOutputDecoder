@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<Configuration>
+       
+    <!-- ################ VIEW DEFINITIONS ################ -->
+    <ViewDefinitions>
+       <View>
+            <Name>CliOutputDecoderTable</Name>
+            <ViewSelectedBy>
+                <TypeName>CliOutputDecoder</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Label>Decoder</Label>
+                        <Width>20</Width>
+                        <Alignment>left</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Source</Label>
+                        <Width>15</Width>
+                        <Alignment>left</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Parameter</Label>
+                        <Width>50</Width>
+                        <Alignment>left</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Description</Label>
+                        <Width>70</Width>
+                        <Alignment>left</Alignment>
+                    </TableColumnHeader>
+                  </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>Decoder</PropertyName>
+                                <Alignment>left</Alignment>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                           	    <PropertyName>Source</PropertyName>
+                                <Alignment>left</Alignment>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Parameter</PropertyName>
+                                <Alignment>left</Alignment>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Description</PropertyName>
+                                <Alignment>left</Alignment>
+                            </TableColumnItem>
+
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+       </View>
+    </ViewDefinitions>
+</Configuration>
+

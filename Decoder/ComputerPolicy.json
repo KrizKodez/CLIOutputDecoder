@@ -1,0 +1,30 @@
+{
+    "Description": "Output of computer policies applied to a computer.",
+    "Source": "gpresult",
+    "Parameter": "/scope Computer /v",
+    "Skip": 0,
+    "Header": "Resultant Set Of Policies for Computer",
+    "Footer": null,
+    "Separator": ["^\\s*$"],
+    "Section": {
+        "Excerpt":["^\\s+(\\w+ \\w+(?:y|s))$","^\\s+-+$"],
+        "Value": "RegEx0.Group0",
+        "Name": "Category"
+    },
+    "GPO": {
+        "Excerpt": ["GPO: (.*)"],
+        "Value": "RegEx0.Group0"
+    },
+    "Setting": {
+        "Excerpt": ["(?:Policy|ServiceName|Folder ID):\\s*(\\S+)"],
+        "Value": "RegEx0.Group0"
+    },
+    "Value": {
+        "Excerpt": ["(?:Computer Setting|Startup|Value):\\s*(\\S.*)"],
+        "Value": "RegEx0.Group0"
+    },
+    "State": {
+        "Excerpt": ["State:\\s*(\\S+)"],
+        "Value": "RegEx0.Group0"
+    }
+}
