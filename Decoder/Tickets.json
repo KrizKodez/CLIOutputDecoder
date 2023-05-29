@@ -1,0 +1,53 @@
+{
+    "Description": "Kerberos Ticket Cache Data.",
+    "Source": "klist",
+    "Parameter": null,
+    "Skip": 0,
+    "Header": "^#0>",
+    "Footer": null,
+    "Separator": ["^\\s*$"],
+    "Client": {
+        "Excerpt": ["Client:(.*) @ (.*)"],
+        "Value": "RegEx0.Group0@RegEx0.Group1"
+    },
+    "Server": {
+        "Excerpt": ["Server:(.*) @ (.*)"],
+        "Value": "RegEx0.Group0@RegEx0.Group1"
+    },
+    "Encryption": {
+        "Excerpt": ["KerbTicket.*?:(.*)"],
+        "Value": "RegEx0.Group0"
+    },
+    "Flags": {
+        "Excerpt": ["Ticket.*?0x([0-9,a-f]+) -> (.*)"],
+        "Value": "0xRegEx0.Group0"
+    },
+    "FlagText": {
+        "Excerpt": ["Ticket.*?0x([0-9,a-f]+) -> (.*)"],
+        "Value": "RegEx0.Group1"
+    },
+    "Start": {
+        "Excerpt": ["Start.*?:(.*?)\\(lokal\\)"],
+        "Value": "RegEx0.Group0"
+    },
+    "End": {
+        "Excerpt": ["End.*?:(.*?)\\(lokal\\)"],
+        "Value": "RegEx0.Group0"
+    },
+    "Renew": {
+        "Excerpt": ["(Renew Time|Erneuerungszeit):(.*?)\\(lokal\\)"],
+        "Value": "RegEx0.Group1"
+    },
+    "SessionType": {
+        "Excerpt": ["(Session Key Type|Sitzungs.*?):(.*)"],
+        "Value": "RegEx0.Group1"
+    },
+    "CacheFlags": {
+        "Excerpt": ["Cache.*?:(.*)"],
+        "Value": "RegEx0.Group0"
+    },
+    "KDC": {
+        "Excerpt": ["kdc.*?:(.*)"],
+        "Value": "RegEx0.Group0"
+    }
+}
