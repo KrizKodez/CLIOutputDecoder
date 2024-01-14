@@ -12,7 +12,7 @@
 RootModule = 'CLIOutputDecoder.psm1'
 
 # Version number of this module
-ModuleVersion = '0.1.2'
+ModuleVersion = '0.3.0'
 
 # ID used to uniquely identify this module
 GUID = 'a7893352-edd1-435f-a0d7-9a227650bd47'

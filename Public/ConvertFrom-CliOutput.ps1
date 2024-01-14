@@ -1,6 +1,6 @@
 ﻿<#PSScriptInfo
 
-.VERSION 0.1.2
+.VERSION 0.2.0
 
 .GUID 98CF7F40-F32D-4222-85AC-082C7AF40E60
 
@@ -28,7 +28,8 @@
     2022-12-01, 0.1.0, Christoph Rust, Initial release. 
     2023-01-06, 0.1.1, Christoph Rust, Corrected bug in Header detection.
     2023-02-26, 0.1.2, Christoph Rust, Corrected the action if the Footer has been detected.
-    2023-02-26, 0.1.2, Christoph Rust, Use of the Parse method if Decoder property has a 'Type' defined..
+    2023-02-26, 0.1.2, Christoph Rust, Use of the Parse method if Decoder property has a 'Type' defined.
+    2024-01-14, 0.2.0, Christoph Rust, A Decoder property support now a localized 'Excerpt' key.
 
 #>
 
@@ -180,6 +181,12 @@ function ConvertFrom-CliOutput
         foreach ($Property in $SelectedDecoder.psobject.Properties) {
             if ($Property.TypeNameOfValue -ne 'System.Management.Automation.PSCustomObject') { Continue }
             $ResultProperties += $Property.Name
+
+            # Check if we have a localized 'Excerpt' key in the property.
+            $UICultureName = ([cultureinfo]::CurrentUICulture).Name
+            if ($SelectedDecoder."$($Property.Name)"."Excerpt_$UICUltureName") {
+                $SelectedDecoder."$($Property.Name)".Excerpt = $SelectedDecoder."$($Property.Name)"."Excerpt_$UICUltureName"
+            }
         }
 
         # Add additional control data to each result property defined in the Decoder.
