@@ -2,8 +2,8 @@
     "Description": "Kerberos Ticket Cache Data.",
     "Source": "klist",
     "Parameter": null,
-    "Skip": 0,
-    "Header": "^#0>",
+    "Skip": 5,
+    "Header": null,
     "Footer": null,
     "Separator": ["^\\s*$"],
     "Client": {
@@ -27,16 +27,20 @@
         "Value": "RegEx0.Group1"
     },
     "Start": {
-        "Excerpt": ["Start.*?:(.*?)\\(lokal\\)"],
-        "Value": "RegEx0.Group0"
+        "Excerpt": ["Start.*?:\\s+([0-9]{1,2})/([0-9]{1,2})/([0-9]{4}) (.*?)\\(lokal\\)"],
+        "Value": "RegEx0.Group2-RegEx0.Group0-RegEx0.Group1 RegEx0.Group3",
+        "Type": "System.DateTime"
     },
     "End": {
-        "Excerpt": ["End.*?:(.*?)\\(lokal\\)"],
-        "Value": "RegEx0.Group0"
+        "Excerpt": ["End.*?:\\s+([0-9]{1,2})/([0-9]{1,2})/([0-9]{4}) (.*?)\\(lokal\\)"],
+        "Value": "RegEx0.Group2-RegEx0.Group0-RegEx0.Group1 RegEx0.Group3",
+        "Type": "System.DateTime"
     },
     "Renew": {
-        "Excerpt": ["(Renew Time|Erneuerungszeit):(.*?)\\(lokal\\)"],
-        "Value": "RegEx0.Group1"
+        "Excerpt": ["Renew Time:\\s+([0-9]{1,2})/([0-9]{1,2})/([0-9]{4}) (.*?)\\(lokal\\)"],
+        "Excerpt_de-DE": ["Erneuerungszeit:\\s+([0-9]{1,2})/([0-9]{1,2})/([0-9]{4}) (.*?)\\(lokal\\)"],
+        "Value": "RegEx0.Group2-RegEx0.Group0-RegEx0.Group1 RegEx0.Group3",
+        "Type": "System.DateTime"
     },
     "SessionType": {
         "Excerpt": ["(Session Key Type|Sitzungs.*?):(.*)"],
