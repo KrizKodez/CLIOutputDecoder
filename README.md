@@ -123,8 +123,9 @@ This is the name of the property in the PSCustomObject.
 * **EXCERPT**
 
 An array of RegEx to detect the data for the property. Each RegEx item in the array will be used one time in a block of lines
-in the same order as defined in the array. A property is only complete if all RegEx items of the EXCEPRT has been matched.
+in the same order as defined in the array. A property is only complete if all RegEx items of the EXCERPT has been matched.
 The RegEx must have capture groups to get the data from the stream.
+You could use a localized EXCERPT if you add the UICulture name to the key name in the form EXCERPT_UICultureName e.g. EXCERPT_de-DE
 
 * **VALUE**
 
