@@ -12,7 +12,7 @@
 RootModule = 'CLIOutputDecoder.psm1'
 
 # Version number of this module
-ModuleVersion = '1.0.0'
+ModuleVersion = '1.1.0'
 
 # ID used to uniquely identify this module
 GUID = 'a7893352-edd1-435f-a0d7-9a227650bd47'
@@ -86,13 +86,16 @@ FileList = @('ConvertFrom-CliOutput.ps1',
              'Get-CliDecoder.ps1',
              'Test-CliDecoder.ps1',
              'ComputerPolicy.json',
+             'EventID2889.json',
              'GetPackageInfo.json',
              'GetPackages.json',
              'nslookupDCIPs.json',
              'nslookupDCs.json',
              'QueryDuplicateSPN.json',
              'GPOData.json',
-             'GPOLink.json')
+             'GPOLink.json',
+             'KerberosTicket.json',
+             'PSManifest.json')
 
 # Private data to pass to the module specified in RootModule/ModuleToProcess
 # PrivateData = ''

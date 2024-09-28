@@ -140,6 +140,18 @@ The function will try to replace each RegEx.Group string with the result from th
 
 Optional string representing a .NET Type. The function will try to convert the VALUE into this type after it has trimmed.
 
+* **BLOCK**
+
+A boolean value to turn on Block-Mode. In some cases the EXCERPT patterns are not able to assign data unambiguous to one property, for that you could turn on the Block-Mode. In this mode matching data will be assign to this property only.
+
+* **BLOCKSTART**
+
+A RegEx to detect the start of the property block.
+
+* **BLOCKEND**
+
+A RegEx to detect the end of the property block.
+
 **THE SECTION KEY**
 
 A key called SECTION is a reserved key which does not behave exactly the same like arbitrary keys. While normal properties are evaluated

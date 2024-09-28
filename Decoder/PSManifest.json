@@ -1,0 +1,33 @@
+{
+    "Description": "Data of the PowerShell Module Manifest file.",
+    "Source": "Get-Content",
+    "Parameter": "-Path <ManifestPath>",
+    "Skip": 0,
+    "Header": "^@\\{",
+    "Footer": null,
+    "Separator": ["^\\}"],
+    "Rootmodule": {
+        "Excerpt": ["(Rootmodule)[ ]*=[ ]*'(.*?)'"],
+        "Value": "RegEx0.Group1"
+    },
+    "ModuleVersion": {
+        "Excerpt": ["(ModuleVersion)[ ]*=[ ]*'(.*?)'"],
+        "Value": "RegEx0.Group1"
+    },
+    "FunctionsToExport": {
+        "Excerpt": ["(FunctionsToExport =[ ]*@\\()*[ ]*'(.*?)'"],
+        "Value": "RegEx0.Group1",
+        "Block": true,
+        "BlockStart": "FunctionsToExport",
+        "BlockEnd": "^#"
+    },
+    "FileList": {
+        "Excerpt": ["(FileList =[ ]*@\\()*[ ]*'(.*?)'"],
+        "Value": "RegEx0.Group1",
+        "Block": true,
+        "BlockStart": "FileList",
+        "BlockEnd": "^#"
+    }
+
+    
+}

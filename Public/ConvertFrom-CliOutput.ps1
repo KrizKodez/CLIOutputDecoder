@@ -1,6 +1,6 @@
 ﻿<#PSScriptInfo
 
-.VERSION 1.0.0
+.VERSION 1.1.0
 
 .GUID 98CF7F40-F32D-4222-85AC-082C7AF40E60
 
@@ -30,6 +30,9 @@
     2023-02-26, 0.1.2, Christoph Rust, Corrected the action if the Footer has been detected.
     2023-02-26, 0.1.2, Christoph Rust, Use of the Parse method if Decoder property has a 'Type' defined.
     2024-01-14, 0.2.0, Christoph Rust, A Decoder property support now a localized 'Excerpt' key.
+    2024-01-14, 1.0.0, Christoph Rust, First production release.
+    2024-05-23, 1.0.1, Christoph Rust, Corrected bug with the 'Name' key of a Decoder property.
+    2024-05-26, 1.1.0, Christoph Rust, Add Block Mode for Decoder Property.
 
 #>
 
@@ -133,52 +136,62 @@ function ConvertFrom-CliOutput
     begin
     {
         # Try to load the Decoder from the Decoder directory and save it into the 'SelectedDecoder' variable.
-        if ($Decoder) {
+        if ($Decoder)
+        {
             try { $FoundDecoder = Get-CliDecoder -Name $Decoder -ErrorAction Stop }
-            catch {
+            catch
+            {
                 Write-Error -Message "Could not load Decoder." -TargetObject $Decoder -Category InvalidArgument
                 break
             }
             
             # We must break if no decoder or more than one has been found.
-            if (-not $FoundDecoder) {
+            if (-not $FoundDecoder)
+            {
                 Write-Error -Message "No Decoder has been found." -TargetObject $Decoder -Category ObjectNotFound
                 break
             }
-            if ($FoundDecoder.Count -gt 1) {
+            if ($FoundDecoder.Count -gt 1)
+            {
                 Write-Error -Message "Decoder is not unambiguous." -TargetObject $Decoder -Category InvalidArgument
                 break
             }
             $SelectedDecoder = $FoundDecoder
         }
-        elseif ($DecoderObject) {
-            if ($DecoderObject -isnot [pscustomobject]) {
+        elseif ($DecoderObject)
+        {
+            if ($DecoderObject -isnot [pscustomobject])
+            {
                 Write-Error -Message "Parameter (DecoderObject) has not the correct type." -TargetObject $DecoderObject -Category InvalidArgument
                 break
             }
 
             # Convert existing hashtables into PSCustomObject type to allow the testing of the 'DecoderObject'.
-            foreach ($Property in $DecoderObject.psobject.Properties) {
+            foreach ($Property in $DecoderObject.psobject.Properties)
+            {
                 if ($Property.TypeNameOfValue -ne 'System.Collections.Hashtable') { Continue }
                 $DecoderObject."$($Property.Name)" = [pscustomobject]($DecoderObject."$($Property.Name)")
             }
 
             # Because the decoder is not loaded from the Decoder directory we must do a separate test.
             $Test = Test-CliDecoder -InputObject $DecoderObject -Script
-            if (-not $Test.IsOK) {
+            if (-not $Test.IsOK)
+            {
                 Write-Error -Message ($Test.ErrorMessage) -Category InvalidArgument
                 break
             }
             $SelectedDecoder = $DecoderObject
         }
-        else {
+        else
+        {
             Write-Error -Message "No decoder has been defined." -Category InvalidArgument
             break
         }
 
         # Find all result properties in the defined Decoder. Result properties must be of type PSCustomObject.
         $ResultProperties = @()
-        foreach ($Property in $SelectedDecoder.psobject.Properties) {
+        foreach ($Property in $SelectedDecoder.psobject.Properties)
+        {
             if ($Property.TypeNameOfValue -ne 'System.Management.Automation.PSCustomObject') { Continue }
             $ResultProperties += $Property.Name
 
@@ -213,12 +226,18 @@ function ConvertFrom-CliOutput
         # Reset the flag to identify the header line.
         $HasHeaderNotFound = $true
 
+        # We need the this variables to detect if a ResultProperty blocks all lines until the BlockEndPattern 
+        # has been detected.
+        $BlockProperty = $null
+        $BlockEndPattern = $null
+        
     }# End of begin block 
 
     process   
     {    
         # If we pipe a FileInfo object we must read the data first.
-        if ($PSCmdlet.ParameterSetName -eq 'File') {
+        if ($PSCmdlet.ParameterSetName -eq 'File')
+        {
             $Data = [System.IO.File]::ReadAllLines($FileInfo.FullName)
             
             # Reset the flag to identify the header line for each new file.
@@ -230,13 +249,15 @@ function ConvertFrom-CliOutput
         foreach ($Line in $Data)
         {
             # Skip the first lines.
-            if ($SelectedDecoder.Skip -gt 0) {
+            if ($SelectedDecoder.Skip -gt 0)
+            {
                 $SelectedDecoder.Skip--
                 continue
             }
 
             # Skip until the Header has been found.
-            if ($SelectedDecoder.Header -and $HasHeaderNotFound) {
+            if ($SelectedDecoder.Header -and $HasHeaderNotFound)
+            {
                 if ($Line -match $SelectedDecoder.Header) { $HasHeaderNotFound = $false }
                 continue
             }
@@ -252,18 +273,58 @@ function ConvertFrom-CliOutput
             {
                 # This is only to shorten code lines.
                 $Property = $SelectedDecoder."$ResultProperty"
-                
+
+                # The next code segment is handling the Block-Mode of a property, that means that
+                # lines only be parsed for exactly one property, the BlockProperty.
+                if ($Property.Block)
+                {
+                    # The property is a blocking property...
+                    if ($BlockProperty)
+                    {
+                        # ... and a block is active ...
+                        if ($BlockProperty -ne $Property.Name) { continue }
+                        
+                        # ... and we are in its block.
+                        # Check if we have reached the end of the block and must deactivate it.
+                        if ($Line -match $BlockEndPattern)
+                        {
+                            $BlockProperty = $null
+                            $BlockEndPattern = $null 
+                        }
+                    }
+                    else
+                    { 
+                        # ... here no block is active so we have to check if we have to activate it.
+                        if ($Line -notmatch $Property.BlockStart) { continue }
+                        
+                        # Yes we have to activate the block mode.
+                        $BlockProperty = $Property.Name
+                        $BlockEndPattern = $Property.BlockEnd
+                    }
+                }
+                elseif ($BlockProperty) { continue }
+
                 # Skip the property if the actual Excerpt RegEx does not match.
                 if ($Line -notmatch $Property.Excerpt[$Property.ExcerptIndex]) { continue }
 
                 # If we have the 'Section' property we must check if it has to be reset.
-                if (($ResultProperty -eq 'Section') -and $Property.Completed) {
+                if (($ResultProperty -eq 'Section') -and $Property.Completed)
+                {
                     $Property.Completed = $false
                     $Property.Values = @()
                 }
                 
+                # We must correct the matches hashtable because PowerShell does not include 
+                # capture groups which does not match and then the matches.count value is not correct.
+                # Our syntax RegEx0.Group0 expects that all capture groups are in the matches table.
+                $HighestMatchesKey = ($matches.Keys | Measure-Object -Maximum).Maximum
+                for ($i = 1 ;$i -le $HighestMatchesKey;$i++) {
+                    if (-not $matches.ContainsKey($i)) {$matches.Add($i,$null)}    
+                }
+                
                 # Catch all capture group data.
-                for ($i = 1 ;$i -le $matches.Count-1;$i++) {
+                for ($i = 1 ;$i -le $matches.Count-1;$i++)
+                {
                     $Keyname = "RegEx" + $Property.ExcerptIndex + ".Group" + ($i-1)
                     $Property.RegExData.Add($Keyname,$matches[$i])
                 }
@@ -275,14 +336,17 @@ function ConvertFrom-CliOutput
                 if ($Property.ExcerptIndex -ne $Property.Excerpt.Count) { continue }
                 
                 # Built the result property 'Name' out of the RegEx capture group data...
-                if (-not $Property.IsNameDefined) {
+                if (-not $Property.IsNameDefined)
+                {
                     foreach ($Key in $Property.RegExData.Keys) {
                         $Property.Name = ($Property.Name -replace $Key,$Property.RegExData[$Key]).Trim(" ")
                     }    
                 }
-                # ... anf if we still have capture group names in the 'Name' property after the first block of lines
+
+                # ... and if we still have capture group names in the 'Name' property after the first block of lines
                 # we are using the static name of the result property instead and never change it again.
-                if ($Property.Name -match 'RegEx[0-9]{1,2}\.Group[0-9]{1,2}') {
+                if ($Property.Name -match 'RegEx[0-9]{1,2}\.Group[0-9]{1,2}')
+                {
                     $Property.Name = $ResultProperty
                     $Property.IsNameDefined = $true
                 }
@@ -296,8 +360,10 @@ function ConvertFrom-CliOutput
                 $TempValue = $TempValue.Trim(" ")
                
                 # If we have a 'Type' defined for the value in the result property we try to convert it.
-                if ($Property.Type) {
-                    try { 
+                if ($Property.Type)
+                {
+                    try
+                    { 
                         $TestCommand = "[$($Property.Type)]::Parse(" + "'" + $TempValue + "')"
                         $TempValue = Invoke-Expression -Command $TestCommand -ErrorAction Stop
                     } 
@@ -330,12 +396,13 @@ function ConvertFrom-CliOutput
                 # This is only to shorten code lines.
                 $Property = $SelectedDecoder."$ResultProperty"
                 
-                if ($Property.IsNameDefined) { $ResultName = $Property.Name }
-                else                         { $ResultName = $ResultProperty }
+                if ($Property.IsNameDefined) { $ResultName = $ResultProperty }
+                else                         { $ResultName = $Property.Name }
 
                 # Distinguish if the result 'Value' should be null, scalar or array.
                 if (-not $Property.Completed) { $ResultValue = $null }
-                else {
+                else
+                {
                     switch ($Property.Values.Count) 
                     {
                         0       { $ResultValue = $null }
@@ -349,7 +416,8 @@ function ConvertFrom-CliOutput
                                
                 # Reset control data of the property except if it is the 'Section' property.
                 # and define if the result object has data to be returned.
-                if ($ResultProperty -ne 'Section') {
+                if ($ResultProperty -ne 'Section')
+                {
                     $Property.Completed = $false
                     $Property.Values = @()
                     if ($ResultValue) { $HasResultObjectData = $true }

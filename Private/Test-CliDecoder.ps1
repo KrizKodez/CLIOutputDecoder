@@ -1,6 +1,6 @@
 ﻿<#PSScriptInfo
 
-.VERSION 0.1.2
+.VERSION 1.0.0
 
 .GUID 2861883C-DBBC-4687-9E0C-1F5196431484
 
@@ -28,6 +28,7 @@
     2022-12-01, 0.1.0, Christoph Rust, Initial release. 
     2023-01-18, 0.1.1, Christoph Rust, Changed Decoder property 'Command' to 'Source'.
     2023-02-26, 0.1.2, Christoph Rust, Changed check of Decoder property 'Type'.
+    2024-01-14, 1.0.0, Christoph Rust, First production release.
 #>
 
 <#
@@ -79,7 +80,8 @@ function Test-CliDecoder
     # Collect all properties of the submitted Decoder to check them.
     $ResultProperties = @()     # Decoder properties which defining output result properties (PSCustomObject).
     $NonResultProperties = @{}  # Decoder properties which describing the decoder and its behavior (NOT PSCustomObject).
-    foreach ($Property in $InputObject.psobject.Properties) {
+    foreach ($Property in $InputObject.psobject.Properties)
+    {
         if ($Property.TypeNameOfValue -match 'PSCustomObject') { $ResultProperties += $Property.Name }
         else                                                   { $NonResultProperties.Add($Property.Name,$Property) }
     }
@@ -90,7 +92,8 @@ function Test-CliDecoder
     else         { $MandatoryProperties = @('Description','Source','Parameter','Skip','Separator') }
     
     # Check if the mandatory properties are existing in the submitted Decoder.
-    foreach ($Name in $MandatoryProperties) {
+    foreach ($Name in $MandatoryProperties)
+    {
         if ($NonResultProperties.Keys -contains $Name) { Continue }
         $Result.IsOK = $false
         $Result.ErrorMessage = "Property ($Name) is mandatory."
@@ -99,13 +102,15 @@ function Test-CliDecoder
     }
     
     # Some properties must have certain types.
-    if ($NonResultProperties['Skip'].TypeNameOfValue -ne 'System.Int32') {
+    if ($NonResultProperties['Skip'].TypeNameOfValue -ne 'System.Int32')
+    {
         $Result.IsOK = $false
         $Result.ErrorMessage = "Property (Skip) must be an integer."
         Write-Output $Result
         return
     }
-    if ($NonResultProperties['Separator'].TypeNameOfValue -ne 'System.Object[]') {
+    if ($NonResultProperties['Separator'].TypeNameOfValue -ne 'System.Object[]')
+    {
         $Result.IsOK = $false
         $Result.ErrorMessage = "Property (Separator) must be an array."
         Write-Output $Result
@@ -113,7 +118,8 @@ function Test-CliDecoder
     }
 
     # Check if we have any result properties in the Decoder.
-    if (-not $ResultProperties.Count) {
+    if (-not $ResultProperties.Count)
+    {
         $Result.IsOK = $false
         $Result.ErrorMessage = "Decoder has no Result property."
         Write-Output $Result
@@ -130,7 +136,8 @@ function Test-CliDecoder
     {
         # Properies 'Excerpt' and 'Value' are mandatory.    
         $Excerpt = $InputObject."$PropertyName".Excerpt
-        if ((-not $Excerpt) -or ($Excerpt -isnot [array])) {
+        if ((-not $Excerpt) -or ($Excerpt -isnot [array]))
+        {
             $Result.IsOK = $false
             $Result.ErrorMessage = "Property ($PropertyName) has no Excerpt or it is not an array."
             Write-Output $Result
@@ -138,7 +145,8 @@ function Test-CliDecoder
         }
 
         $Value = $InputObject."$PropertyName".Value
-        if ((-not $Value) -or ($Value -isnot [string])) {
+        if ((-not $Value) -or ($Value -isnot [string]))
+        {
             $Result.IsOK = $false
             $Result.ErrorMessage = "Property ($PropertyName) has no Value or ist is not a string."
             Write-Output $Result
@@ -147,7 +155,8 @@ function Test-CliDecoder
 
         # Check the optional property 'Name'.
         $Name = $InputObject."$PropertyName".Name
-        if ($Name -and ($Name -isnot [string])){
+        if ($Name -and ($Name -isnot [string]))
+        {
             $Result.IsOK = $false
             $Result.ErrorMessage = "Name item of oroperty ($PropertyName) is not a string."
             Write-Output $Result
@@ -156,8 +165,10 @@ function Test-CliDecoder
 
         # Check the optional property 'Type'.
         $Type = $InputObject."$PropertyName".Type
-        if ($Type) {
-            if ($Type -isnot [string]) {
+        if ($Type)
+        {
+            if ($Type -isnot [string])
+            {
                 $Result.IsOK = $false
                 $Result.ErrorMessage = "Type item of property ($PropertyName) is not a string."
                 Write-Output $Result
@@ -173,15 +184,18 @@ function Test-CliDecoder
             }
             
             # Check if the 'Type' does have a Parse method.
-            try { 
+            try
+            { 
                 $TestObject = New-Object -TypeName $Type -ErrorAction Stop
                 $HasParseMethod = Get-Member -InputObject $TestObject -Static -Name Parse -ErrorAction Stop
-                if (-Not $HasParseMethod) {
+                if (-Not $HasParseMethod)
+                {
                     $Result.IsOK = $false
                     $Result.ErrorMessage = "Type item of property ($PropertyName) has not a usable type."    
                 }
             }
-            catch {
+            catch
+            {
                 $Result.IsOK = $false
                 $Result.ErrorMessage = "Type item of property ($PropertyName) has not a usable type."
             }

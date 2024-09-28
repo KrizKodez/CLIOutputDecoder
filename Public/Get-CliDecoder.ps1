@@ -25,7 +25,8 @@
 .EXTERNALSCRIPTDEPENDENCIES
 
 .RELEASENOTES
-    2022-12-01, 0.1.0, Christoph Rust, Initial release. 
+    2022-12-01, 0.1.0, Christoph Rust, Initial version.
+    2024-01-14, 1.0.0, Christoph Rust, First production release. 
 
 #>
 
@@ -102,15 +103,17 @@ function Get-CliDecoder
     {
         # Read the raw string data from the file and try to convert it from JSON type.
         $FileContent = Get-Content -Path $DecoderFile.FullName -Raw
-        try   { $Result = ConvertFrom-Json -InputObject $FileContent -ErrorAction Stop }
-        catch { 
+        try { $Result = ConvertFrom-Json -InputObject $FileContent -ErrorAction Stop }
+        catch
+        { 
             Write-Error -Message "Cannot convert JSON File." -TargetObject $DecoderFile.Name -Category InvalidResult 
             continue
         }
 
         # Check the decoder.
         $Test = Test-CliDecoder -InputObject $Result
-        if (-not $Test.IsOK) {
+        if (-not $Test.IsOK)
+        {
             Write-Error -Message $Test.ErrorMessage -TargetObject $DecoderFile.Name -Category InvalidData
             continue
         }
